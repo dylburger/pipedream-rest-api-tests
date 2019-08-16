@@ -43,7 +43,7 @@ describe("We expect the API to be RESTful", () => {
   test("GET against a non-existent resource should return a 404", async () => {
     const res = await axios({
       method: "get",
-      url: `${REST_API_ENDPOINT}/this-key-does-not-exist`,
+      url: `${REST_API_ENDPOINT}/this-key-does-not-exist/1`,
       headers,
       validateStatus: () => true
     });
@@ -70,6 +70,35 @@ describe("We expect the API to be RESTful", () => {
     });
     expect(getRes.status).toEqual(200);
     expect(getRes.data).toEqual(postData);
+  });
+
+  test("POST to /cars, then /trucks. GET / should return /cars/1 and /trucks/1", async () => {
+    const postData = { name: "Toyota Corolla" };
+    const cars = "cars";
+    await axios({
+      method: "post",
+      url: `${REST_API_ENDPOINT}/${cars}`,
+      headers,
+      data: JSON.stringify(postData)
+    });
+
+    const post2Data = { person: "Ford F150" };
+    const trucks = "trucks";
+    await axios({
+      method: "post",
+      url: `${REST_API_ENDPOINT}/${trucks}`,
+      headers,
+      data: JSON.stringify(post2Data)
+    });
+
+    // Now make the GET request
+    const getRes = await axios({
+      method: "get",
+      url: `${REST_API_ENDPOINT}/`,
+      headers
+    });
+    expect(getRes.status).toEqual(200);
+    expect(getRes.data).toEqual([`/${cars}/1`, `/${trucks}/1`]);
   });
 
   test("POST to /names twice, then GET /names/2 should return the POSTed data", async () => {
@@ -104,6 +133,43 @@ describe("We expect the API to be RESTful", () => {
     expect(getRes.data).toEqual(post2Data);
   });
 
+  test("POST to /cars twice, then /trucks. GET /cars should return the two cars keys", async () => {
+    const postData = { name: "Toyota Corolla" };
+    const cars = "cars";
+    await axios({
+      method: "post",
+      url: `${REST_API_ENDPOINT}/${cars}`,
+      headers,
+      data: JSON.stringify(postData)
+    });
+
+    const post2Data = { name: "Honda Civic" };
+    await axios({
+      method: "post",
+      url: `${REST_API_ENDPOINT}/${cars}`,
+      headers,
+      data: JSON.stringify(post2Data)
+    });
+
+    const post3Data = { name: "Han Solo" };
+    const trucks = "trucks";
+    await axios({
+      method: "post",
+      url: `${REST_API_ENDPOINT}/${trucks}`,
+      headers,
+      data: JSON.stringify(post2Data)
+    });
+
+    // Now make the GET request to /cars
+    const getRes = await axios({
+      method: "get",
+      url: `${REST_API_ENDPOINT}/${cars}`,
+      headers
+    });
+    expect(getRes.status).toEqual(200);
+    expect(getRes.data).toEqual([`/${cars}/1`, `/${cars}/2`]);
+  });
+
   test("POST to /names, then PUT to /names/1. GET to /names/1 should return the updated data from the PUT", async () => {
     const postData = { name: "Luke Skywalker" };
     const resource = "names";
@@ -133,5 +199,30 @@ describe("We expect the API to be RESTful", () => {
     });
     expect(getRes.status).toEqual(200);
     expect(getRes.data).toEqual(putData);
+  });
+
+  test("POST to /names, then DELETE /names/1. GET to /names/1 should return a 404", async () => {
+    const postData = { name: "Luke Skywalker" };
+    const resource = "names";
+    await axios({
+      method: "post",
+      url: `${REST_API_ENDPOINT}/${resource}`,
+      headers,
+      data: JSON.stringify(postData)
+    });
+
+    await axios({
+      method: "delete",
+      url: `${REST_API_ENDPOINT}/${resource}/1`,
+      headers
+    });
+
+    const getRes = await axios({
+      method: "get",
+      url: `${REST_API_ENDPOINT}/${resource}/1`,
+      headers,
+      validateStatus: () => true
+    });
+    expect(getRes.status).toEqual(404);
   });
 });
