@@ -20,4 +20,6 @@ or create a `.env` file and use [something like the setup described here](https:
 
 ### Usage
 
-Run `npm test` to run the tests.
+Run `npm test` to run the tests. 
+
+**These tests are slow** because we're making many HTTP requests to our mock REST API, validating the responses, and then resetting the API state for the next test.

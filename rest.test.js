@@ -133,9 +133,10 @@ describe("We expect the API to be RESTful", () => {
     expect(getRes.data).toEqual(post2Data);
   });
 
-  test("POST to /cars twice, then /trucks. GET /cars should return the two cars", async () => {
+  test("POST to /cars twice, then /trucks. GET /cars should return data on the two cars with their IDs", async () => {
     const postData = { name: "Toyota Corolla" };
     const cars = "cars";
+    const id = { id: 1 };
     await axios({
       method: "post",
       url: `${REST_API_ENDPOINT}/${cars}`,
@@ -144,6 +145,7 @@ describe("We expect the API to be RESTful", () => {
     });
 
     const post2Data = { name: "Honda Civic" };
+    const id2 = { id: 2 };
     await axios({
       method: "post",
       url: `${REST_API_ENDPOINT}/${cars}`,
@@ -168,7 +170,54 @@ describe("We expect the API to be RESTful", () => {
     });
 
     expect(getRes.status).toEqual(200);
-    expect(JSON.stringify(getRes.data)).toEqual(JSON.stringify([postData, post2Data,]));
+    expect(getRes.data).toEqual([
+      { ...id, ...postData },
+      { ...id2, ...post2Data }
+    ]);
+  });
+
+  test("POST to /people a few times with complex objects. GET /people should return data on all people with their IDs", async () => {
+    const postData = { name: "Luke" };
+    const people = "people";
+    const id = { id: 1 };
+    await axios({
+      method: "post",
+      url: `${REST_API_ENDPOINT}/${people}`,
+      headers,
+      data: JSON.stringify(postData)
+    });
+
+    const post2Data = { name: "Leia" };
+    const id2 = { id: 2 };
+    await axios({
+      method: "post",
+      url: `${REST_API_ENDPOINT}/${people}`,
+      headers,
+      data: JSON.stringify(post2Data)
+    });
+
+    const post3Data = { name: "Amidala", position: "Senator" };
+    id3 = { id: 3 };
+    await axios({
+      method: "post",
+      url: `${REST_API_ENDPOINT}/${people}`,
+      headers,
+      data: JSON.stringify(post3Data)
+    });
+
+    // Now make the GET request to /people
+    const getRes = await axios({
+      method: "get",
+      url: `${REST_API_ENDPOINT}/${people}`,
+      headers
+    });
+
+    expect(getRes.status).toEqual(200);
+    expect(getRes.data).toEqual([
+      { ...id, ...postData },
+      { ...id2, ...post2Data },
+      { ...id3, ...post3Data }
+    ]);
   });
 
   test("POST to /names, then PUT to /names/1. GET to /names/1 should return the updated data from the PUT", async () => {
