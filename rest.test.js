@@ -82,7 +82,7 @@ describe("We expect the API to be RESTful", () => {
       data: JSON.stringify(postData)
     });
 
-    const post2Data = { person: "Ford F150" };
+    const post2Data = { name: "Ford F150" };
     const trucks = "trucks";
     await axios({
       method: "post",
@@ -133,7 +133,7 @@ describe("We expect the API to be RESTful", () => {
     expect(getRes.data).toEqual(post2Data);
   });
 
-  test("POST to /cars twice, then /trucks. GET /cars should return the two cars keys", async () => {
+  test("POST to /cars twice, then /trucks. GET /cars should return the two cars", async () => {
     const postData = { name: "Toyota Corolla" };
     const cars = "cars";
     await axios({
@@ -151,7 +151,7 @@ describe("We expect the API to be RESTful", () => {
       data: JSON.stringify(post2Data)
     });
 
-    const post3Data = { name: "Han Solo" };
+    const post3Data = { name: "Ford F150" };
     const trucks = "trucks";
     await axios({
       method: "post",
@@ -166,8 +166,9 @@ describe("We expect the API to be RESTful", () => {
       url: `${REST_API_ENDPOINT}/${cars}`,
       headers
     });
+
     expect(getRes.status).toEqual(200);
-    expect(getRes.data).toEqual([`/${cars}/1`, `/${cars}/2`]);
+    expect(JSON.stringify(getRes.data)).toEqual(JSON.stringify([postData, post2Data,]));
   });
 
   test("POST to /names, then PUT to /names/1. GET to /names/1 should return the updated data from the PUT", async () => {
