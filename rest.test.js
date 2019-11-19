@@ -9,6 +9,7 @@ const { REST_API_ENDPOINT } = process.env;
 // header or a pipedream_response=1 query string param. See
 // https://docs.pipedream.com/notebook/sources/#http-responses
 const headers = {
+  "Content-Type": "application/json",
   "x-pipedream-response": "true"
 };
 
